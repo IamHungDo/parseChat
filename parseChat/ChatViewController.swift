@@ -31,8 +31,11 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
             
             
         }
-            messageField.text = ""
+        messageField.text = ""
+        tableView.reloadData()
     }
+    
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,6 +44,9 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
         tableView.dataSource = self
         tableView.estimatedRowHeight = 100
         tableView.rowHeight = UITableViewAutomaticDimension
+        Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(ChatViewController.onTimer), userInfo: nil, repeats: true)
+        
+        
     }
     
     override func didReceiveMemoryWarning() {
@@ -49,13 +55,40 @@ class ChatViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> UITableViewCell  {
-        return 5
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int  {
+        return 10
     }
-
+    
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "chatCell", for: indexPath) as! ChatViewCell
+        cell.messageLabel.text = message["text"] as! String?
         
+        
+        return cell
+    }
+    
+    func onTimer() {
+        
+        let query = PFQuery(className:"Message")
+        query.findObjectsInBackground { (objects: [PFObject]?, error: Error?) in
+            if error == nil {
+                // The find succeeded.
+                print("Successfully retrieved \(objects!.count) scores.")
+                // Do something with the found objects
+                if let objects = objects {
+                    for object in objects {
+                        print(object["text"])
+                    }
+                }
+            } else {
+                // Log details of the failure
+                print("error")
+            }
+            query.order(byDescending: "Message")
+
+
+        }
     }
     
     /*
